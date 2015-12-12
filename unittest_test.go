@@ -31,4 +31,17 @@ func TestUnitTest(t *testing.T) {
 	Equals(t, IsNil(nil, Wat()), true)
 	Equals(t, NotNil(nil, &wat{}), true)
 	Equals(t, NotNil(nil, Wat()), false)
+
+	// print
+	Equals(t, print(string("yo")), "yo")
+	Equals(t, print([]rune("yo")), "yo")
+	Equals(t, print([]byte("yo")), "yo")
+	// there is no way to tell the difference between a byte and uint8
+	Equals(t, print(byte('y')), fmt.Sprintf("%d", 'y'))
+	Equals(t, print(uint8('y')), fmt.Sprintf("%d", 'y'))
+	// there is no way to tell the difference between a rune and int32
+	Equals(t, print(rune('o')), fmt.Sprintf("%d", 'o'))
+	Equals(t, print(int32('o')), fmt.Sprintf("%d", 'o'))
+	Equals(t, print(int32(-13)), "-13")
+	Equals(t, print(uint64(37)), "37")
 }

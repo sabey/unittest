@@ -16,18 +16,20 @@ func Equals(
 	b interface{},
 ) bool {
 	if a != b {
-		var m string
 		if is_int(a) && is_int(b) {
 			if fmt.Sprintf("%d", a) == fmt.Sprintf("%d", b) {
 				return true
 			}
-			m = fmt.Sprintf("numbers don't match %v(%T) != %v(%T)", a, a, b, b)
-		} else {
-			m = fmt.Sprintf("%v(%T) != %v(%T)", a, a, b, b)
 		}
-		s := fmt.Sprintf("%s\n%s\n", m, stacktrace.StackTrace(0))
+		s := "`"
+		s += print(a)
+		s += fmt.Sprintf("` (%T) != `", a)
+		s += print(b)
+		s += fmt.Sprintf("` (%T)\n", b)
+		s += stacktrace.StackTrace(0)
+		s += "\n"
 		if t != nil {
-			t.Fatalf(s)
+			t.Fatal(s)
 		} else {
 			log.Print(s)
 		}
@@ -41,9 +43,15 @@ func EqualsExact(
 	b interface{},
 ) bool {
 	if a != b {
-		s := fmt.Sprintf("%v(%T) != %v(%T)\n%s\n", a, a, b, b, stacktrace.StackTrace(0))
+		s := "`"
+		s += print(a)
+		s += fmt.Sprintf("` (%T) != `", a)
+		s += print(b)
+		s += fmt.Sprintf("` (%T)\n", b)
+		s += stacktrace.StackTrace(0)
+		s += "\n"
 		if t != nil {
-			t.Fatalf(s)
+			t.Fatal(s)
 		} else {
 			log.Print(s)
 		}
@@ -56,9 +64,13 @@ func IsNil(
 	a interface{},
 ) bool {
 	if !isNil(a) {
-		s := fmt.Sprintf("%v(%T) != nil\n%s\n", a, a, stacktrace.StackTrace(0))
+		s := "`"
+		s += print(a)
+		s += fmt.Sprintf("` (%T) != nil\n", a)
+		s += stacktrace.StackTrace(0)
+		s += "\n"
 		if t != nil {
-			t.Fatalf(s)
+			t.Fatal(s)
 		} else {
 			log.Print(s)
 		}
@@ -71,9 +83,13 @@ func NotNil(
 	a interface{},
 ) bool {
 	if isNil(a) {
-		s := fmt.Sprintf("%v(%T) == nil\n%s\n", a, a, stacktrace.StackTrace(0))
+		s := "`"
+		s += print(a)
+		s += fmt.Sprintf("` (%T) == nil\n", a)
+		s += stacktrace.StackTrace(0)
+		s += "\n"
 		if t != nil {
-			t.Fatalf(s)
+			t.Fatal(s)
 		} else {
 			log.Print(s)
 		}
@@ -97,27 +113,27 @@ func is_int(
 	t interface{},
 ) bool {
 	switch t.(type) {
-	case int:
+	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
 		return true
-	case int8:
-		return true
-	case int16:
-		return true
-	case int32:
-		return true
-	case int64:
-		return true
-	case uint:
-		return true
-	case uint8:
-		return true
-	case uint16:
-		return true
-	case uint32:
-		return true
-	case uint64:
-		return true
-	default:
 	}
 	return false
+}
+func print(
+	t interface{},
+) string {
+	if is_int(t) {
+		// there is no way to tell the difference between a byte and uint8, or rune and int32
+		// reflect has no way to tell the difference between an alias
+		// I rather just print them as integers than their character
+		return fmt.Sprintf("%d", t)
+	}
+	switch v := t.(type) {
+	case string:
+		return v
+	case []byte:
+		return string(v)
+	case []rune:
+		return string(v)
+	}
+	return fmt.Sprintf("%v", t)
 }
