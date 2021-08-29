@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
-	"sabey.co/stacktrace"
+	"github.com/sabey/stacktrace"
 	"testing"
 )
 
